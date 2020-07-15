@@ -1,6 +1,7 @@
 # jetson-kvm
 
-WIP docs for this.
+WIP docs for this, expands on [BaoqianWang's docs](https://github.com/BaoqianWang/VirtualizationOnJetsonTX2
+) and various posts on the NVIDIA forums.
 
 ## Why?
 
@@ -62,6 +63,22 @@ Now enable the following options:
 make ARCH=arm64 O=$TEGRA_KERNEL_OUT -j$(nproc)
 ```
 
+#### Build a better rootfs (optional)
+
+If you'd prefer a system with more up to date packages that what the base 18.04 Sample rootfs provides, you can take one from another `aarch64` distribution.
+
+I've tested:
+
+* [ArchLinux Arms ARMv8 AArch64 Multi-platform](https://archlinuxarm.org/about/downloads)
+* [Alpine's Mini Root Filesystem](https://alpinelinux.org/downloads/)
+
+You need to make sure:
+* It has `/sbin/init` (or use `flash.sh` to specify an alternative init)
+* Copy over the sample rootfs `/boot`
+* Install the modules (next step)
+
+After that, it should boot.
+
 #### Replace Default Kernel
 
 Run the following to move the build artifacts to the 
@@ -91,7 +108,7 @@ sudo ./flash.sh -d ./kernel/dtb/tegra186-quill-p3310-1000-c03-00-base.dtb jetson
 You need to install the EFI tools and virt-manager to create and manage VMs:
 
 ```
-sudo apt install kvmtool virt-manager qemu-efi
+sudo apt install kvmtool virt-manager qemu-efi # stock rootfs
 ```
 
 ### Run a VM
@@ -100,7 +117,5 @@ Try something like Alpine Linux.
 
 ## References
 
-* [1]
 * [flashing] https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fflashing.html%23wwpID0E0UJ0HA
 * [arm_user_irq] https://www.spinics.net/lists/kvm/msg147786.html
-* https://github.com/BaoqianWang/VirtualizationOnJetsonTX2
