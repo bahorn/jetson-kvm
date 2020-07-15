@@ -1,0 +1,19 @@
+diff --git a/test.dts b/out.dts
+index 2bd4af8..e68fb31 100644
+--- a/test.dts
++++ b/out.dts
+@@ -10445,8 +10445,12 @@
+        interrupt-controller@3881000 {
+                compatible = "arm,cortex-a15-gic";
+                #interrupt-cells = <0x3>;
+-               interrupt-controller;
+-               reg = <0x0 0x3881000 0x0 0x1000 0x0 0x3882000 0x0 0x2000>;
++        interrupt-controller;
++        reg = <0x0 0x03881000 0x0 0x00001000>,
++              <0x0 0x03882000 0x0 0x00002000>,
++              <0x0 0x03884000 0x0 0x00002000>,
++              <0x0 0x03886000 0x0 0x00002000>;
++        interrupts = <1 9 0xf04>;
+                status = "okay";
+                linux,phandle = <0x1>;
+                phandle = <0x1>;
