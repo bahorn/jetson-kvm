@@ -1,0 +1,26 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 7ed05ee..ff14569 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -5,17 +5,17 @@ _version="0.99.1-0"
+ pkgver="0.99.1_0"
+ pkgrel="1"
+ pkgdesc="A mesh VPN that makes it easy to connect your devices, wherever they are."
+-arch=("x86_64")
++arch=("aarch64")
+ url="https://tailscale.com"
+ license=("MIT")
+ depends=("glibc")
+ backup=("etc/default/tailscaled")
+-source=("$pkgname-$pkgver.tgz::https://pkgs.tailscale.com/stable/tailscale_${_version}_amd64.tgz")
+-sha256sums=('f7ffd02f68b013c8a02eb3a303b33f29ebb19b2c4fce786fa838491cea5802fd')
++source=("$pkgname-$pkgver.tgz::https://pkgs.tailscale.com/stable/tailscale_${_version}_arm64.tgz")
++sha256sums=('09ced64c8c758fe71d788b6533e60748b2d9e1e2ff0d25bb941e067f1b7707c8')
+ install="tailscale.install"
+ 
+ package() {
+-    cd tailscale_${_version}_amd64
++  cd tailscale_${_version}_arm64
+   mkdir -p "$pkgdir/usr/bin" "$pkgdir/etc/default" "$pkgdir/usr/lib/systemd/system"
+   install -m755 tailscale tailscaled "$pkgdir/usr/bin"
+   install -m644 systemd/tailscaled.defaults "$pkgdir/etc/default/tailscaled"
