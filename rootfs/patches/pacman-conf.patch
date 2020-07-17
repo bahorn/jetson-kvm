@@ -1,0 +1,8 @@
+25c25
+< #IgnorePkg   =
+---
+> IgnorePkg    = linux-aarch64
+35c35
+< CheckSpace
+---
+> #CheckSpace

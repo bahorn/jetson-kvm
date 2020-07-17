@@ -1,0 +1,93 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: Upgrade all packages to the latest version
+    apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+  - name: Install required packages
+    apt:
+      name:
+        - qemu
+        - binfmt-support
+        - qemu-user-static
+        - build-essential
+        - curl
+      state: latest
+
+
+  - name: Create Storage Directory
+    file:
+      path: "/srv/{{ item }}"
+      state: directory
+      mode: '0755'
+    loop:
+      - packages
+      - build
+      - toolchain
+
+  # Download required packages
+  - name: Fetch LinuxForTegra
+    get_url:
+      url: https://developer.nvidia.com/embedded/L4T/r32_Release_v4.3/t186ref_release_aarch64/Tegra186_Linux_R32.4.3_aarch64.tbz2
+      dest: /srv/packages/Tegra186_Linux_R32.4.3_aarch64.tbz2
+      checksum: sha256:9a2d13b1f4b67fef97a428d54724b23e84e14636eedfa22f338c2d1ea62558e2
+
+  - name: Fetch Sample RootFS
+    get_url:
+      url: https://developer.nvidia.com/embedded/L4T/r32_Release_v4.3/t186ref_release_aarch64/Tegra_Linux_Sample-Root-Filesystem_R32.4.3_aarch64.tbz2
+      dest: /srv/packages/Tegra_Linux_Sample-Root-Filesystem_R32.4.3_aarch64.tbz2
+      checksum: sha256:85e8b418e713c2ad48d9d4dca79740eb99d5d229b4c135b642f4e603be0b1e99
+
+  - name: Fetch ArchLinux Arm RootFS
+    get_url:
+      url: http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
+      dest: /srv/packages/ArchLinuxARM-aarch64-latest.tar.gz
+      checksum: md5:a96fc4edb2b7a5f06ae91e79cea045ef
+
+  - name: Fetch Linaro toolchain
+    get_url:
+      url: http://releases.linaro.org/components/toolchain/binaries/7.3-2018.05/aarch64-linux-gnu/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz
+      dest: /srv/packages/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz
+      checksum:  md5:http://releases.linaro.org/components/toolchain/binaries/7.3-2018.05/aarch64-linux-gnu/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz.asc
+
+  # Extract packages to where they are needed.
+  - name: Unpack The Linaro Toolchain
+    unarchive:
+      src: /srv/packages/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz
+      dest: /srv/toolchain
+      remote_src: yes
+
+  - name: Unpack LinuxForTegra
+    unarchive:
+      src: /srv/packages/Tegra186_Linux_R32.4.3_aarch64.tbz2
+      dest: /srv/build/
+      remote_src: yes
+
+  - name: Clean up existing rootfs
+    file:
+      path: /srv/build/Linux_for_Tegra/rootfs
+      state: absent
+
+  - name: Create Storage Directory
+    file:
+      path: "/srv/build/Linux_for_Tegra/{{ item }}"
+      state: directory
+      mode: '0755'
+    loop:
+      - rootfs
+      - sample-rootfs
+
+  - name: Unpack ArchLinux Arm RootFS
+    unarchive:
+      src: /srv/packages/ArchLinuxARM-aarch64-latest.tar.gz
+      dest: /srv/build/Linux_for_Tegra/rootfs
+      remote_src: yes
+
+  - name: Unpack Sample RootFS
+    unarchive:
+      src: /srv/packages/Tegra_Linux_Sample-Root-Filesystem_R32.4.3_aarch64.tbz2
+      dest: /srv/build/Linux_for_Tegra/sample-rootfs
+      remote_src: yes

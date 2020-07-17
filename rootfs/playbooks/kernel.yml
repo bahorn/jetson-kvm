@@ -1,0 +1,36 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: Install required packages
+    apt:
+      name:
+        - bc
+  - name: Fetch the kernel sources
+    get_url:
+      url: https://developer.nvidia.com/embedded/L4T/r32_Release_v4.3/sources/T186/public_sources.tbz2
+      dest: /srv/packages/public_sources.tbz2
+      checksum: sha256:6b3a4517657918ffe365320b22b2546789c5aeb5cd996b39442c975cabce2c1f
+
+  - name: Unpack the public sources
+    unarchive:
+      src: /srv/packages/public_sources.tbz2
+      dest: /srv/build/
+      remote_src: yes
+
+  - name: Unpack kernel
+    unarchive:
+      src: /srv/build/Linux_for_Tegra/source/public/kernel_src.tbz2
+      dest: /srv/build/Linux_for_Tegra/source/public
+      remote_src: yes
+
+  - name: Build Kernel
+    shell:
+      cmd: |
+        export CROSS_COMPILE=/srv/toolchain/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+        export LOCALVERSION=-tegra
+        export TEGRA_KERNEL_OUT=/srv/build/Linux_for_Tegra/build
+        mkdir -p $TEGRA_KERNEL_OUT
+        wget https://raw.githubusercontent.com/bahorn/jetson-kvm/master/.config -O $TEGRA_KERNEL_OUT/.config
+        make ARCH=arm64 O=$TEGRA_KERNEL_OUT -j$(nproc)
+      chdir: /srv/build/Linux_for_Tegra/source/public/kernel/kernel-4.9

@@ -1,0 +1,68 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: Apply our pacman.conf patch
+    patch:
+      src: ../patches/pacman-conf.patch
+      dest: /srv/build/Linux_for_Tegra/rootfs/etc/pacman.conf
+
+  - name: Add Qemu components
+    apt:
+      name:
+        - qemu-user-static
+        - qemu-user
+        - qemu-utils
+      state: latest
+
+  - name: Enable Systemd services
+    systemd:
+      name: systemd-binfmt
+      enabled: yes
+      state: started
+
+  - name: Setup bindings for chroot
+    shell:
+      cmd: |
+        rm ./etc/resolv.conf
+        echo "nameserver 8.8.8.8" > ./etc/resolv.conf
+        mount -o rbind /dev ./dev
+        mount -o bind /sys ./sys
+        mount -o bind /tmp ./tmp
+        mount -t proc none ./proc
+      chdir: /srv/build/Linux_for_Tegra/rootfs
+
+  - name: Copy over the setup shell script
+    copy:
+      src: ../scripts/setup.sh
+      dest: /srv/build/Linux_for_Tegra/rootfs/setup.sh
+      mode: '0777'
+
+  - name: Copy over the setup shell script
+    copy:
+      src: ../scripts/setup.sh
+      dest: /srv/build/Linux_for_Tegra/rootfs/setup.sh
+      mode: '0777'
+
+  - name: Copy over the list of requried packages
+    copy:
+      src: ../packages/packages.txt
+      dest: /srv/build/Linux_for_Tegra/rootfs/packages.txt
+      mode: '0777'
+
+  - name: Execute the setup shell script
+    shell:
+      cmd: |
+        chroot . /bin/bash /setup.sh
+      chdir: /srv/build/Linux_for_Tegra/rootfs
+
+  - name: Remove bindings
+    shell:
+      cmd: |
+        rm ./usr/bin/qemu-aarch64-static
+        umount ./dev
+        umount ./sys
+        umount ./tmp
+        umount ./proc
+        cd ..; umount ./rootfs
+      chdir: /srv/build/Linux_for_Tegra/rootfs
