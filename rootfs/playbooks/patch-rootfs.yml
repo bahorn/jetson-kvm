@@ -59,10 +59,8 @@
   - name: Remove bindings
     shell:
       cmd: |
-        rm ./usr/bin/qemu-aarch64-static
         umount ./dev
         umount ./sys
         umount ./tmp
         umount ./proc
-        cd ..; umount ./rootfs
       chdir: /srv/build/Linux_for_Tegra/rootfs
