@@ -4,22 +4,8 @@
   tasks:
   - name: Apply our pacman.conf patch
     patch:
-      src: ../patches/pacman-conf.patch
+      src: ../patches/pacman/pacman-conf.patch
       dest: /srv/build/Linux_for_Tegra/rootfs/etc/pacman.conf
-
-  - name: Add Qemu components
-    apt:
-      name:
-        - qemu-user-static
-        - qemu-user
-        - qemu-utils
-      state: latest
-
-  - name: Enable Systemd services
-    systemd:
-      name: systemd-binfmt
-      enabled: yes
-      state: started
 
   - name: Setup bindings for chroot
     shell:
@@ -64,3 +50,17 @@
         umount ./tmp
         umount ./proc
       chdir: /srv/build/Linux_for_Tegra/rootfs
+
+
+  - name: Install Kernel Modules
+    shell:
+      cmd: |
+        export CROSS_COMPILE=/srv/toolchain/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+        export LOCALVERSION=-tegra
+        export TEGRA_KERNEL_OUT=/srv/build/Linux_for_Tegra/build
+        cp $TEGRA_KERNEL_OUT/arch/arm64/boot/Image /srv/build/Linux_for_Tegra/kernel/Image
+        cp -r $TEGRA_KERNEL_OUT/arch/arm64/boot/dts/ /srv/build/Linux_for_Tegra/kernel/dtb/
+        make ARCH=arm64 O=$TEGRA_KERNEL_OUT modules_install INSTALL_MOD_PATH=/srv/build/Linux_for_Tegra/rootfs/
+        cp -r /srv/build/Linux_for_Tegra/sample-rootfs/boot /srv/build/Linux_for_Tegra/rootfs
+      chdir: /srv/build/Linux_for_Tegra/source/public/kernel/kernel-4.9
+

@@ -13,10 +13,17 @@
         - qemu
         - binfmt-support
         - qemu-user-static
+        - qemu-user
+        - qemu-utils
         - build-essential
         - curl
       state: latest
 
+  - name: Enable SystemD services
+    systemd:
+      name: systemd-binfmt
+      enabled: yes
+      state: started
 
   - name: Create Storage Directory
     file:
